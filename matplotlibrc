@@ -1,0 +1,10 @@
+#details can be found here: http://matplotlib.org/users/customizing.html
+
+#avoid backend problem in virtualenv
+backend: TkAgg
+
+#use type1 font instead of type3
+ps.useafm: True
+pdf.use14corefonts: True
+text.usetex: True
+

@@ -1,0 +1,152 @@
+Host *
+    ServerAliveInterval 240
+
+# connection through rsa authentification
+# http://www.linuxproblem.org/art_9.html
+# in short: 
+#   ssh-keygen -t rsa
+#   cat .ssh/key.pub | ssh user@host 'cat >> .ssh/authorized_keys'
+   
+Host github.com
+  User git
+  Hostname github.com
+  IdentityFile ~/.ssh/github
+
+Host mllab
+    HostName 141.223.107.130
+    User dongwoo
+    Port 22
+    IdentityFile ~/.ssh/nci
+
+Host mllab-admin
+    HostName 141.223.107.130
+    User MLadmin
+    Port 22
+    IdentityFile ~/.ssh/nci
+
+
+Host a atlanta
+    HostName 10.2.5.2
+    User dongwoo
+    ProxyJump bypass
+    Port 22
+    IdentityFile ~/.ssh/nci
+
+Host b beijing
+    HostName 10.2.5.3
+    User dongwoo
+    ProxyJump bypass
+    Port 22
+    IdentityFile ~/.ssh/nci
+
+Host c canberra
+    HostName 10.2.5.4
+    User dongwoo
+    ProxyJump bypass
+    Port 22
+    IdentityFile ~/.ssh/nci
+
+Host d dubai
+    HostName 10.2.5.5
+    User dongwoo
+    ProxyJump bypass
+    Port 22
+    IdentityFile ~/.ssh/nci
+
+Host e edinburgh
+    HostName 10.2.5.6
+    User dongwoo
+    ProxyJump bypass
+    Port 22
+    IdentityFile ~/.ssh/nci
+    
+Host s seoul bypass
+    HostName 141.223.19.31
+    User dongwoo
+    Port 22
+    IdentityFile ~/.ssh/nci
+
+Host csec
+    HostName csecluster.postech.ac.kr
+    User dongwookim
+    Port 22
+    IdentityFile ~/.ssh/nci
+
+Host aigc
+    HostName ai-cluster.postech.ac.kr 
+    User dongwookim
+    Port 50000
+    IdentityFile ~/.ssh/nci
+
+Host csittest
+    HostName csittest.anu.edu.au
+    User comp2100
+    IdentityFile ~/.ssh/cpu_cecs
+
+Host gitlab.anu.edu.au
+    IdentityFile ~/.ssh/arco
+
+Host gitlab.cecs.anu.edu.au
+    IdentityFile ~/.ssh/arco
+
+Host arco
+    HostName arco.cecs.anu.edu.au
+    User u1009226
+    Port 22
+    IdentityFile ~/.ssh/arco
+    ProxyCommand ssh -i ~/.ssh/cpu_cecs u1009226@cpu.cecs.anu.edu.au -W %h:%p
+
+Host braun
+    HostName braun.cecs.anu.edu.au
+    User u1009226
+    Port 22
+    IdentityFile ~/.ssh/braun
+    ProxyCommand ssh -i ~/.ssh/cpu_cecs u1009226@cpu.cecs.anu.edu.au -W %h:%p
+
+Host cray
+    HostName cray.cecs.anu.edu.au
+    User u1009226
+    Port 22
+    IdentityFile ~/.ssh/braun
+    ProxyCommand ssh -i ~/.ssh/cpu_cecs u1009226@cpu.cecs.anu.edu.au -W %h:%p
+
+Host dijkstra
+    HostName dijkstra.cecs.anu.edu.au
+    User u1009226
+    Port 22
+    IdentityFile ~/.ssh/braun
+    ProxyCommand ssh -i ~/.ssh/cpu_cecs u1009226@cpu.cecs.anu.edu.au -W %h:%p
+
+Host partch
+    HostName partch.anu.edu.au
+    User u1009226
+    Port 22
+    IdentityFile ~/.ssh/partch_rsa
+    ProxyCommand ssh -i ~/.ssh/cpu_cecs u1009226@cpu.cecs.anu.edu.au -W %h:%p
+
+Host varese
+    HostName varese.anu.edu.au
+    User comp2100
+    Port 22
+    IdentityFile ~/.ssh/cpu_cecs
+    ProxyCommand ssh -i ~/.ssh/cpu_cecs u1009226@cpu.cecs.anu.edu.au -W %h:%p
+
+
+Host zelda
+    HostName 130.56.248.53
+    User ubuntu
+    Port 22
+    IdentityFile ~/.ssh/zelda
+
+Host comp
+    HostName 130.56.248.215
+    User ubuntu
+    Port 22
+    IdentityFile ~/.ssh/id_rsa
+
+Host nci
+    HostName raijin.nci.org.au
+    User dk3920
+    Port 22
+    IdentityFile ~/.ssh/nci
+

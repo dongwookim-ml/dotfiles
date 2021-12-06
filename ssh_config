@@ -59,6 +59,13 @@ Host e edinburgh
     ProxyJump bypass
     Port 22
     IdentityFile ~/.ssh/nci
+
+Host f florence
+    HostName 10.2.5.7
+    User dongwoo
+    ProxyJump bypass
+    Port 22
+    IdentityFile ~/.ssh/nci
     
 Host s seoul bypass
     HostName 141.223.19.31

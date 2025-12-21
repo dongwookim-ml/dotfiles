@@ -48,6 +48,9 @@ augroup END
 
 "Comment lines with 'gc'
 Plug 'tpope/vim-commentary'
+
+"Color scheme solarized
+Plug 'altercation/vim-colors-solarized'
 nnoremap <C-c> :Commentary<CR>
 vnoremap <C-c> :Commentary<CR>
 
@@ -107,7 +110,7 @@ noremap <Space> :set hlsearch! hlsearch?<CR>
 
 "Color scheme solarized: https://github.com/altercation/vim-colors-solarized
 set background=dark
-colorscheme solarized
+silent! colorscheme solarized
 
 set encoding=utf-8
 
@@ -177,4 +180,3 @@ function! SaveAndExecutePython()
     setlocal readonly
     setlocal nomodifiable
 endfunction
-

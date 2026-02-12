@@ -54,11 +54,18 @@ Plug 'altercation/vim-colors-solarized'
 nnoremap <C-c> :Commentary<CR>
 vnoremap <C-c> :Commentary<CR>
 
+" New plugins
+Plug 'tpope/vim-surround'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'vim-airline/vim-airline'
+Plug 'airblade/vim-gitgutter'
+
 call plug#end()
 
 syntax on
 
-set nu              " Set line number 
+set nu              " Set line number
 
 set tabstop=4       " The width of a TAB is set to 4.
                     " Still it is a \t. It is just that
@@ -67,8 +74,8 @@ set tabstop=4       " The width of a TAB is set to 4.
 set shiftwidth=4    " Indents will have a width of 4
 set softtabstop=4   " Sets the number of columns for a TAB
 set expandtab       " Expand TABs to spaces
-set smarttab        " Enabling this will make the tab key 
-                    "(in insert mode) insert spaces or tabs 
+set smarttab        " Enabling this will make the tab key
+                    "(in insert mode) insert spaces or tabs
                     "to go to the next indent of the next tabstop
                     "when the cursor is at the beginning of a line
                     "(ie: the only preceding characters are whitespace).
@@ -114,8 +121,6 @@ silent! colorscheme solarized
 
 set encoding=utf-8
 
-" For powerline-status: https://github.com/powerline/powerline
-set rtp+=/usr/local/anaconda3/lib/python3.6/site-packages/powerline/bindings/vim
 " Always show statusline
 set laststatus=2
 " Use 256 colours (Use this setting only if your terminal supports 256 colours)
@@ -180,3 +185,47 @@ function! SaveAndExecutePython()
     setlocal readonly
     setlocal nomodifiable
 endfunction
+
+" ── Enhanced settings ───────────────────────────────────────────────
+
+" Relative line numbers (keeps absolute on current line via 'nu' above)
+set relativenumber
+
+" Search improvements
+set incsearch
+set ignorecase
+set smartcase
+
+" Persistent undo
+if has('persistent_undo')
+    set undodir=~/.vim/undodir
+    if !isdirectory(&undodir)
+        call mkdir(&undodir, 'p')
+    endif
+    set undofile
+endif
+
+" Auto-read files changed externally
+set autoread
+au FocusGained,BufEnter * silent! checktime
+
+" Wildmenu for command completion
+set wildmenu
+set wildmode=longest:full,full
+
+" Cursor line highlighting
+set cursorline
+
+" Faster update time (helps gitgutter)
+set updatetime=250
+
+" fzf runtime path
+set rtp+=/opt/homebrew/opt/fzf
+
+" fzf.vim key mappings
+nnoremap <C-p> :Files<CR>
+nnoremap <leader>b :Buffers<CR>
+nnoremap <leader>rg :Rg<CR>
+
+" vim-airline
+let g:airline_powerline_fonts = 1

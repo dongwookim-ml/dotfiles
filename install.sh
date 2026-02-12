@@ -1,39 +1,73 @@
 #!/bin/bash
+set -e
 
-# copy zshfile
-# cp -i zshrc ~/.zshrc
+DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# copy vim config file
-cp -i vimrc ~/.vimrc
+echo "Installing dotfiles from $DOTFILES_DIR"
 
-# matpotlibrc
-# mkdir -p ~/.matplotlib
-# cp -i matplotlibrc ~/.matplotlib/matplotlibrc 
+# ── Homebrew ────────────────────────────────────────────────────────
+if ! command -v brew &>/dev/null; then
+    echo "Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+fi
 
-# install font
-# clone
-git clone https://github.com/powerline/fonts.git --depth=1
-# install
-cd fonts
-./install.sh
-# clean-up a bit
-cd ..
-rm -rf fonts
+echo "Installing brew packages..."
+brew install stow tmux fzf
 
+# ── Oh My Zsh ───────────────────────────────────────────────────────
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "Installing Oh My Zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+fi
 
-# install powerlevel9k theme for oh-my-zsh
-# git clone https://github.com/bhilburn/powerlevel9k.git ~/.oh-my-zsh/custom/themes/powerlevel9k
+# ── Zsh plugins ─────────────────────────────────────────────────────
+ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
-git clone https://github.com/altercation/vim-colors-solarized ~/.vim/bundle/
-mkdir -p ~/.vim/colors/
-cp -i ~/.vim/bundle/colors/solarized.vim ~/.vim/colors/
+if [ ! -d "$ZSH_CUSTOM/themes/powerlevel10k" ]; then
+    echo "Installing Powerlevel10k..."
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$ZSH_CUSTOM/themes/powerlevel10k"
+fi
 
-# copy ssh config file
-mkdir -p ~/.ssh
-cp -i ssh_config ~/.ssh/config
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
+    echo "Installing zsh-autosuggestions..."
+    git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+fi
 
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+    echo "Installing zsh-syntax-highlighting..."
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+fi
 
-# add ssh-keys
-cp ./ssh/* ~/.ssh/
-chmod 600 ~/.ssh/*
+# ── TPM (Tmux Plugin Manager) ──────────────────────────────────────
+if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+    echo "Installing TPM..."
+    git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
+fi
 
+# ── Stow packages ──────────────────────────────────────────────────
+cd "$DOTFILES_DIR"
+
+echo "Stowing dotfiles..."
+for pkg in zsh vim tmux ssh claude; do
+    if [ -d "$pkg" ]; then
+        echo "  Stowing $pkg..."
+        stow -t "$HOME" --restow "$pkg"
+    fi
+done
+
+# ── Vim plugins ─────────────────────────────────────────────────────
+echo "Installing vim plugins..."
+vim +PlugInstall +qall 2>/dev/null || true
+
+# ── fzf key bindings ───────────────────────────────────────────────
+if [ -f /opt/homebrew/opt/fzf/install ]; then
+    /opt/homebrew/opt/fzf/install --key-bindings --completion --no-update-rc --no-bash --no-fish
+elif [ -f /usr/local/opt/fzf/install ]; then
+    /usr/local/opt/fzf/install --key-bindings --completion --no-update-rc --no-bash --no-fish
+fi
+
+echo ""
+echo "Done! Next steps:"
+echo "  1. Create ~/.zshrc.local for machine-specific config (conda, tokens, etc.)"
+echo "  2. Open a new terminal — p10k configure wizard will launch if needed"
+echo "  3. In tmux, press C-a Shift-I to install TPM plugins"

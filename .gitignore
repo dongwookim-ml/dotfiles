@@ -1,0 +1,9 @@
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Never commit private keys
+ssh/.ssh/id_*
+ssh/.ssh/*.pem
+ssh/.ssh/known_hosts

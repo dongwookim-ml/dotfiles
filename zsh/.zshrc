@@ -36,6 +36,7 @@ alias gd='git diff'
 alias gl='git log --oneline --graph --decorate -20'
 alias gc='git commit'
 alias gp='git push'
+alias cc='claude --dangerously-skip-permissions --continue || claude --dangerously-skip-permissions'
 
 export PATH="$HOME/.local/bin:$PATH"
 

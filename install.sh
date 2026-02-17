@@ -47,11 +47,50 @@ fi
 # ── Stow packages ──────────────────────────────────────────────────
 cd "$DOTFILES_DIR"
 
+# Back up existing files that would conflict with stow
+handle_stow_conflicts() {
+    local pkg="$1"
+    local conflicts=()
+
+    while IFS= read -r file; do
+        local rel="${file#"$pkg"/}"
+        local target="$HOME/$rel"
+        # Conflict = real file (not a symlink) already exists at target
+        if [ -e "$target" ] && [ ! -L "$target" ]; then
+            conflicts+=("$target")
+        fi
+    done < <(find "$pkg" -type f)
+
+    if [ ${#conflicts[@]} -eq 0 ]; then
+        return 0
+    fi
+
+    echo "  Existing files found for $pkg:"
+    for f in "${conflicts[@]}"; do
+        echo "    $f"
+    done
+
+    read -rp "  Overwrite? Backups will be saved as .bak [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        for f in "${conflicts[@]}"; do
+            echo "    Backing up $f → ${f}.bak"
+            cp "$f" "${f}.bak"
+            rm "$f"
+        done
+        return 0
+    else
+        echo "  Skipping $pkg"
+        return 1
+    fi
+}
+
 echo "Stowing dotfiles..."
 for pkg in zsh vim tmux ssh claude; do
     if [ -d "$pkg" ]; then
         echo "  Stowing $pkg..."
-        stow -t "$HOME" --restow "$pkg"
+        if handle_stow_conflicts "$pkg"; then
+            stow -t "$HOME" --restow "$pkg"
+        fi
     fi
 done
 

@@ -58,3 +58,4 @@ Credentials and machine-local config go in `~/.zshrc.local` (git-ignored, source
 - When adding a new tool's config, create a new stow package directory mirroring the home directory path (e.g., `git/.gitconfig` for `~/.gitconfig`).
 - Plugin managers handle their own installation: vim-plug auto-curls on first vim launch; TPM clones on `install.sh` run.
 - The `install.sh` script is idempotent — safe to re-run. If existing (non-symlink) files conflict with a stow package, it prompts to overwrite and backs up originals as `.bak`.
+- **Linux support**: On Linux, the script runs without sudo. It installs fzf locally to `~/.fzf` if not found, and falls back to manual symlinks (`ln -sf`) when stow is unavailable. Only `tmux` and `zsh` are hard requirements.

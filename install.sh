@@ -5,14 +5,29 @@ DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "Installing dotfiles from $DOTFILES_DIR"
 
-# ── Homebrew ────────────────────────────────────────────────────────
-if ! command -v brew &>/dev/null; then
-    echo "Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+# ── Homebrew & core packages ──────────────────────────────────────
+if [[ "$(uname)" == "Darwin" ]]; then
+    # macOS: install Homebrew if missing, then use it for core packages
+    if ! command -v brew &>/dev/null; then
+        echo "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    fi
+    echo "Installing brew packages..."
+    brew install stow tmux fzf
+else
+    # Linux: verify required tools are available (install via system package manager)
+    missing=()
+    for cmd in stow tmux fzf zsh; do
+        command -v "$cmd" &>/dev/null || missing+=("$cmd")
+    done
+    if [ ${#missing[@]} -ne 0 ]; then
+        echo "Missing required packages: ${missing[*]}"
+        echo "Install them with your system package manager, e.g.:"
+        echo "  sudo apt install ${missing[*]}"
+        echo "  sudo yum install ${missing[*]}"
+        exit 1
+    fi
 fi
-
-echo "Installing brew packages..."
-brew install stow tmux fzf
 
 # ── Oh My Zsh ───────────────────────────────────────────────────────
 if [ ! -d "$HOME/.oh-my-zsh" ]; then
@@ -104,10 +119,23 @@ echo "Installing vim plugins..."
 vim +PlugInstall +qall 2>/dev/null || true
 
 # ── fzf key bindings ───────────────────────────────────────────────
-if [ -f /opt/homebrew/opt/fzf/install ]; then
-    /opt/homebrew/opt/fzf/install --key-bindings --completion --no-update-rc --no-bash --no-fish
-elif [ -f /usr/local/opt/fzf/install ]; then
-    /usr/local/opt/fzf/install --key-bindings --completion --no-update-rc --no-bash --no-fish
+fzf_install=""
+for candidate in \
+    /opt/homebrew/opt/fzf/install \
+    /usr/local/opt/fzf/install \
+    /home/linuxbrew/.linuxbrew/opt/fzf/install \
+    /usr/share/doc/fzf/examples/key-bindings.zsh; do
+    if [ -f "$candidate" ]; then
+        fzf_install="$candidate"
+        break
+    fi
+done
+if [ -n "$fzf_install" ]; then
+    if [[ "$fzf_install" == */key-bindings.zsh ]]; then
+        echo "fzf key bindings available at $fzf_install (sourced via plugin)"
+    else
+        "$fzf_install" --key-bindings --completion --no-update-rc --no-bash --no-fish
+    fi
 fi
 
 echo ""

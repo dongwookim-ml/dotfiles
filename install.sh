@@ -15,9 +15,18 @@ if [[ "$(uname)" == "Darwin" ]]; then
     echo "Installing brew packages..."
     brew install stow tmux fzf
 else
-    # Linux: verify required tools are available (install via system package manager)
+    # Linux: install fzf to ~/.fzf if not available
+    if ! command -v fzf &>/dev/null; then
+        if [ ! -d "$HOME/.fzf" ]; then
+            echo "Installing fzf to ~/.fzf..."
+            git clone --depth 1 https://github.com/junegunn/fzf.git "$HOME/.fzf"
+        fi
+        "$HOME/.fzf/install" --key-bindings --completion --no-update-rc --no-bash --no-fish
+    fi
+
+    # Verify remaining required tools
     missing=()
-    for cmd in stow tmux fzf zsh; do
+    for cmd in tmux zsh; do
         command -v "$cmd" &>/dev/null || missing+=("$cmd")
     done
     if [ ${#missing[@]} -ne 0 ]; then
@@ -67,7 +76,7 @@ fi
 # ── Stow packages ──────────────────────────────────────────────────
 cd "$DOTFILES_DIR"
 
-# Back up existing files that would conflict with stow
+# Back up existing files that would conflict with stow/symlinks
 handle_stow_conflicts() {
     local pkg="$1"
     local conflicts=()
@@ -104,12 +113,28 @@ handle_stow_conflicts() {
     fi
 }
 
+# Manual symlink fallback when stow is not available
+stow_manual() {
+    local pkg="$1"
+    while IFS= read -r file; do
+        local rel="${file#"$pkg"/}"
+        local target="$HOME/$rel"
+        local source="$DOTFILES_DIR/$file"
+        mkdir -p "$(dirname "$target")"
+        ln -sf "$source" "$target"
+    done < <(find "$pkg" -type f)
+}
+
 echo "Stowing dotfiles..."
 for pkg in zsh vim tmux ssh claude; do
     if [ -d "$pkg" ]; then
         echo "  Stowing $pkg..."
         if handle_stow_conflicts "$pkg"; then
-            stow -t "$HOME" --restow "$pkg"
+            if command -v stow &>/dev/null; then
+                stow -t "$HOME" --restow "$pkg"
+            else
+                stow_manual "$pkg"
+            fi
         fi
     fi
 done
@@ -123,6 +148,7 @@ fzf_install=""
 for candidate in \
     /opt/homebrew/opt/fzf/install \
     /usr/local/opt/fzf/install \
+    "$HOME/.fzf/install" \
     /home/linuxbrew/.linuxbrew/opt/fzf/install \
     /usr/share/doc/fzf/examples/key-bindings.zsh; do
     if [ -f "$candidate" ]; then

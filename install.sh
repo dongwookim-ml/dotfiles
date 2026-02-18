@@ -38,6 +38,11 @@ if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
     git clone https://github.com/zsh-users/zsh-syntax-highlighting "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
 fi
 
+if [ ! -d "$ZSH_CUSTOM/plugins/zsh-completions" ]; then
+    echo "Installing zsh-completions..."
+    git clone https://github.com/zsh-users/zsh-completions "$ZSH_CUSTOM/plugins/zsh-completions"
+fi
+
 # ── TPM (Tmux Plugin Manager) ──────────────────────────────────────
 if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
     echo "Installing TPM..."

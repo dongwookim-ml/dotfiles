@@ -38,6 +38,14 @@ alias gc='git commit'
 alias gp='git push'
 alias cc='claude --dangerously-skip-permissions --continue || claude --dangerously-skip-permissions'
 
+# tmux
+alias ta='tmux attach -t'
+alias tad='tmux attach -d -t'
+alias tl='tmux list-sessions'
+alias tn='tmux new-session -s'
+alias tk='tmux kill-session -t'
+alias tks='tmux kill-server'
+
 export PATH="$HOME/.local/bin:$PATH"
 
 # ── Machine-specific overrides ──────────────────────────────────────

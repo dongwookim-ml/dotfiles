@@ -48,6 +48,22 @@ alias tks='tmux kill-server'
 
 export PATH="$HOME/.local/bin:$PATH"
 
+# ── Dotfiles update check ─────────────────────────────────────────
+# Compares local HEAD against remote tracking ref (no network cost).
+# A background fetch keeps remote refs fresh for the next shell.
+() {
+  local dotdir="$HOME/dotfiles"
+  [[ -d "$dotdir/.git" ]] || return
+  local local_head remote_head
+  local_head=$(git -C "$dotdir" rev-parse HEAD 2>/dev/null) || return
+  remote_head=$(git -C "$dotdir" rev-parse @{u} 2>/dev/null) || return
+  if [[ "$local_head" != "$remote_head" ]]; then
+    print -P "%F{yellow}[dotfiles] Your dotfiles are out of date. Run 'cd ~/dotfiles && git pull' to update.%f"
+  fi
+  # Fetch in background so remote refs are fresh next time
+  git -C "$dotdir" fetch --quiet 2>/dev/null &!
+}
+
 # ── Machine-specific overrides ──────────────────────────────────────
 # Put machine-specific config (conda init, tokens, etc.) in ~/.zshrc.local
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

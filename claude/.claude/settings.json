@@ -15,5 +15,14 @@
     "github@claude-plugins-official": true
   },
   "effortLevel": "high",
-  "skipDangerousModePermissionPrompt": true
+  "skipDangerousModePermissionPrompt": true,
+  "mcpServers": {
+      "slurm": {
+        "command": "ssh",
+        "args": [
+          "dongwookim@ai2",
+          "cd /home1/dongwookim/slurm-mcp && .venv/bin/python server.py"
+        ]
+      }
+    }
 }

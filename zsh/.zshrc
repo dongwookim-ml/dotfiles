@@ -47,7 +47,7 @@ alias tn='tmux new-session -s'
 alias tk='tmux kill-session -t'
 alias tks='tmux kill-server'
 
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 
 # ── Dotfiles update check ─────────────────────────────────────────
 # Compares local HEAD against remote tracking ref (no network cost).

@@ -34,35 +34,23 @@ def send_slack_notification(webhook_url: str, job_name: str, status: str, summar
         emoji = "\u2139\ufe0f"
         color = "#0dcaf0"
 
-    # Build message payload with attachment for rich formatting
+    # Build message payload with attachment for color bar + formatted fields
     payload = {
         "attachments": [
             {
                 "color": color,
-                "blocks": [
+                "fallback": f"{emoji} {job_name}: {status} - {summary}",
+                "pretext": f"{emoji} *Job Completed: {job_name}*",
+                "fields": [
                     {
-                        "type": "header",
-                        "text": {
-                            "type": "plain_text",
-                            "text": f"{emoji} Job Completed: {job_name}",
-                            "emoji": True
-                        }
+                        "title": "Status",
+                        "value": status,
+                        "short": True
                     },
                     {
-                        "type": "section",
-                        "fields": [
-                            {
-                                "type": "mrkdwn",
-                                "text": f"*Status:*\n{status}"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": f"*Summary:*\n{summary}"
-                        }
+                        "title": "Summary",
+                        "value": summary,
+                        "short": False
                     }
                 ]
             }

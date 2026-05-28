@@ -5,8 +5,8 @@ Personal development environment managed with [GNU Stow](https://www.gnu.org/sof
 ## Quick Start
 
 ```bash
-git clone git@github.com:dongwookim-ml/dotfiles.git ~/dotfiles
-cd ~/dotfiles
+git clone git@github.com:dongwookim-ml/dotfiles.git ~/dotfile
+cd ~/dotfile
 ./install.sh
 ```
 
@@ -19,7 +19,6 @@ dotfiles/
 ├── tmux/         → ~/.tmux.conf
 ├── ssh/          → ~/.ssh/config
 ├── claude/       → ~/.claude/{settings.json, skills/}
-├── scripts/      → Utility scripts (not stowed)
 └── install.sh    → Bootstrap script
 ```
 

@@ -6,23 +6,31 @@
     "commit": "",
     "pr": ""
   },
+  "permissions": {
+    "allow": [
+      "Bash(latexmk -pdf -interaction=nonstopmode main.tex)",
+      "Bash(latexmk -C main.tex)",
+      "Bash(pdfinfo main.pdf)"
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "npx -y ccstatusline@latest",
     "padding": 0
   },
   "enabledPlugins": {
-    "github@claude-plugins-official": true
+    "github@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true
   },
-  "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
+  "remoteControlAtStartup": false,
   "mcpServers": {
-      "slurm": {
-        "command": "ssh",
-        "args": [
-          "dongwookim@ai2",
-          "cd /home1/dongwookim/slurm-mcp && .venv/bin/python server.py"
-        ]
-      }
+    "slurm": {
+      "command": "ssh",
+      "args": [
+        "dongwookim@ai2",
+        "cd /home1/dongwookim/slurm-mcp && .venv/bin/python server.py"
+      ]
     }
+  }
 }

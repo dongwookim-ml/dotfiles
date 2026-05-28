@@ -61,3 +61,14 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
+## 5. Academic Paper Writing (LaTeX)
+
+**Direct, concise prose. Consistent notation.**
+
+When writing or editing academic manuscripts in `.tex`:
+- Avoid em-dashes (`---`) and en-dashes (`--`) for parenthetical explanation. Use a comma, or split into two sentences.
+- Minimize parentheses. If a point matters, state it as a sentence; if it doesn't, drop it.
+- Write simple, direct sentences. Avoid nested clauses where a period would do.
+- Keep notation consistent throughout the manuscript: each symbol defined once, used the same way everywhere.
+- Every sentence should earn its place. Cut filler, hedges, and restatements.
+

@@ -20,8 +20,31 @@
   },
   "enabledPlugins": {
     "github@claude-plugins-official": true,
-    "swift-lsp@claude-plugins-official": true
+    "swift-lsp@claude-plugins-official": true,
+    "humanize-korean@im-not-ai": true,
+    "caveman@caveman": true
   },
+  "extraKnownMarketplaces": {
+    "openai-codex": {
+      "source": {
+        "source": "github",
+        "repo": "openai/codex-plugin-cc"
+      }
+    },
+    "im-not-ai": {
+      "source": {
+        "source": "github",
+        "repo": "epoko77-ai/im-not-ai"
+      }
+    },
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    }
+  },
+  "effortLevel": "xhigh",
   "skipDangerousModePermissionPrompt": true,
   "remoteControlAtStartup": false,
   "mcpServers": {

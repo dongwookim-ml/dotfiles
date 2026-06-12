@@ -12,17 +12,33 @@
     "padding": 0
   },
   "enabledPlugins": {
-    "github@claude-plugins-official": true
+    "github@claude-plugins-official": true,
+    "cc-gemini-plugin@cc-gemini-plugin": true,
+    "caveman@caveman": true
+  },
+  "extraKnownMarketplaces": {
+    "cc-gemini-plugin": {
+      "source": {
+        "source": "github",
+        "repo": "thepushkarp/cc-gemini-plugin"
+      }
+    },
+    "caveman": {
+      "source": {
+        "source": "github",
+        "repo": "JuliusBrussee/caveman"
+      }
+    }
   },
   "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
   "mcpServers": {
-      "slurm": {
-        "command": "ssh",
-        "args": [
-          "dongwookim@ai2",
-          "cd /home1/dongwookim/slurm-mcp && .venv/bin/python server.py"
-        ]
-      }
+    "slurm": {
+      "command": "ssh",
+      "args": [
+        "dongwookim@ai2",
+        "cd /home1/dongwookim/slurm-mcp && .venv/bin/python server.py"
+      ]
     }
+  }
 }

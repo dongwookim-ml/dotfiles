@@ -22,6 +22,7 @@
     "github@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
     "humanize-korean@im-not-ai": true,
+    "cc-gemini-plugin@cc-gemini-plugin": true,
     "caveman@caveman": true
   },
   "extraKnownMarketplaces": {
@@ -35,6 +36,12 @@
       "source": {
         "source": "github",
         "repo": "epoko77-ai/im-not-ai"
+      }
+    },
+    "cc-gemini-plugin": {
+      "source": {
+        "source": "github",
+        "repo": "thepushkarp/cc-gemini-plugin"
       }
     },
     "caveman": {

@@ -6,6 +6,13 @@
     "commit": "",
     "pr": ""
   },
+  "permissions": {
+    "allow": [
+      "Bash(latexmk -pdf -interaction=nonstopmode main.tex)",
+      "Bash(latexmk -C main.tex)",
+      "Bash(pdfinfo main.pdf)"
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "npx -y ccstatusline@latest",
@@ -13,6 +20,7 @@
   },
   "enabledPlugins": {
     "github@claude-plugins-official": true,
+    "swift-lsp@claude-plugins-official": true,
     "cc-gemini-plugin@cc-gemini-plugin": true,
     "caveman@caveman": true
   },
@@ -30,8 +38,8 @@
       }
     }
   },
-  "effortLevel": "high",
   "skipDangerousModePermissionPrompt": true,
+  "remoteControlAtStartup": false,
   "mcpServers": {
     "slurm": {
       "command": "ssh",

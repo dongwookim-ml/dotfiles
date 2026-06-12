@@ -31,3 +31,5 @@ When writing or editing academic manuscripts in `.tex`:
 - Avoid em-dashes (`---`) and en-dashes (`--`) for parenthetical explanation. Use a comma, or split into two sentences.
 - No emojis or em-dashes.
 - Do not guess APIs, versions, flags, commit SHAs, or package names. Verify by reading code or docs before asserting.
+- If a job takes too long, send a slack notification via skill when the job is finished.
+

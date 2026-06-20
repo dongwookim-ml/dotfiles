@@ -13,6 +13,42 @@
       "Bash(pdfinfo main.pdf)"
     ]
   },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "ExitPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"/Users/dongwookim/.claude/hooks/codex-plan-review.sh\"",
+            "timeout": 300,
+            "statusMessage": "Codex reviewing plan..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sid=$(jq -r '.session_id // \"default\"'); date +%s > \"/tmp/claude-turn-start-$sid\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "async": true,
+            "command": "sid=$(jq -r '.session_id // \"default\"'); f=\"/tmp/claude-turn-start-$sid\"; [ -f \"$f\" ] || exit 0; start=$(cat \"$f\"); rm -f \"$f\"; el=$(( $(date +%s) - start )); thr=\"${CLAUDE_LONG_JOB_SECONDS:-600}\"; [ \"$el\" -ge \"$thr\" ] || exit 0; m=$((el/60)); s=$((el%60)); python3 \"$HOME/.claude/skills/slack-notify/scripts/send_notification.py\" --job-name \"Claude Code job\" --status completed --summary \"Finished after ${m}m ${s}s\" >/dev/null 2>&1 || true"
+          }
+        ]
+      }
+    ]
+  },
   "statusLine": {
     "type": "command",
     "command": "npx -y ccstatusline@latest",
@@ -62,28 +98,5 @@
         "cd /home1/dongwookim/slurm-mcp && .venv/bin/python server.py"
       ]
     }
-  },
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sid=$(jq -r '.session_id // \"default\"'); date +%s > \"/tmp/claude-turn-start-$sid\""
-          }
-        ]
-      }
-    ],
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "async": true,
-            "command": "sid=$(jq -r '.session_id // \"default\"'); f=\"/tmp/claude-turn-start-$sid\"; [ -f \"$f\" ] || exit 0; start=$(cat \"$f\"); rm -f \"$f\"; el=$(( $(date +%s) - start )); thr=\"${CLAUDE_LONG_JOB_SECONDS:-600}\"; [ \"$el\" -ge \"$thr\" ] || exit 0; m=$((el/60)); s=$((el%60)); python3 \"$HOME/.claude/skills/slack-notify/scripts/send_notification.py\" --job-name \"Claude Code job\" --status completed --summary \"Finished after ${m}m ${s}s\" >/dev/null 2>&1 || true"
-          }
-        ]
-      }
-    ]
   }
 }

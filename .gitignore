@@ -10,3 +10,7 @@ ssh/.ssh/known_hosts
 
 # Machine-local ssh overrides
 ssh/.ssh/config.local
+
+# Claude hooks: track only custom scripts, not plugin-generated files or runtime state
+claude/.claude/hooks/*
+!claude/.claude/hooks/codex-plan-review.sh

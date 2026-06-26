@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sid=$(jq -r '.session_id // \"default\"'); date +%s > \"/tmp/claude-turn-start-$sid\""
+            "command": "sid=$(python3 -c 'import sys,json;print(json.load(sys.stdin).get(\"session_id\",\"default\"))'); date +%s > \"/tmp/claude-turn-start-$sid\""
           }
         ]
       }

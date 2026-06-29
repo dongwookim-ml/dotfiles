@@ -47,6 +47,17 @@
           }
         ]
       }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$HOME/.claude/hooks/slack-input-notify.sh\"",
+            "async": true
+          }
+        ]
+      }
     ]
   },
   "statusLine": {
@@ -90,6 +101,7 @@
   "effortLevel": "xhigh",
   "skipDangerousModePermissionPrompt": true,
   "remoteControlAtStartup": false,
+  "tui": "fullscreen",
   "mcpServers": {
     "slurm": {
       "command": "ssh",

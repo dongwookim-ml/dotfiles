@@ -15,3 +15,4 @@ ssh/.ssh/config.local
 claude/.claude/hooks/*
 !claude/.claude/hooks/codex-plan-review.sh
 !claude/.claude/hooks/slack-job-notify.sh
+!claude/.claude/hooks/slack-input-notify.sh

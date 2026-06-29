@@ -9,6 +9,13 @@ msg="$(printf '%s' "$payload" | jq -r '.message // empty')"
 tpath="$(printf '%s' "$payload" | jq -r '.transcript_path // empty')"
 cwd="$(printf '%s' "$payload" | jq -r '.cwd // empty')"
 
+# Skip the generic idle "waiting for your input" notification that fires after a
+# turn finishes: job completion is already covered by the Stop hook
+# (slack-job-notify.sh). Only ping for actionable requests like permission prompts.
+case "$(printf '%s' "$msg" | tr '[:upper:]' '[:lower:]')" in
+  *"waiting for your input"*) exit 0 ;;
+esac
+
 # What Claude is actually asking = last assistant text in the transcript.
 ctx=""
 if [ -n "$tpath" ] && [ -f "$tpath" ]; then

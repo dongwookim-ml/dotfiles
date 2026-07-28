@@ -1,6 +1,6 @@
 ---
 name: gpu-experiments
-description: Plan, launch, and manage ML experiments on the lab GPU resources. Use when the user wants to run training or experiments on GPUs, check GPU availability, pick where to run a job, or stage data between machines. Covers interactive nodes a-i, the b200-2 server, and the ai2 Slurm cluster.
+description: Plan, launch, and manage ML experiments on the lab GPU resources. Use when the user wants to run training or experiments on GPUs, check GPU availability, pick where to run a job, or stage data between machines. Covers the interactive nodes a-i and the ai2 Slurm cluster.
 ---
 
 # GPU Experiments Manager
@@ -9,7 +9,7 @@ Source of truth for hardware, storage, QOS, and quotas: `references/resource-gui
 Read it before making resource decisions. This skill is the workflow; the guide is the data.
 
 Works from any machine whose `~/.ssh/config` has the lab host aliases (`a`..`i`,
-`b200-2`, `ai2`, `seoul`), including the laptop, since every step runs over `ssh`.
+`ai2`, `seoul`), including the laptop, since every step runs over `ssh`.
 Absolute paths below are paths on the remote machines, not on the machine you
 invoke from.
 
@@ -19,14 +19,14 @@ invoke from.
 |------|------|
 | Quick run, debugging, <=48 GB VRAM | Interactive nodes: `g`/`i` (A6000 48 GB), `c`/`e`/`f` (3090), `d`/`h` (A5000) |
 | Batch jobs, many GPUs, queueing | Slurm via `ai2` |
-| >80 GB VRAM per GPU or B200-class throughput | `b200-2` (8x B200 180 GB, needs CUDA 12.8+ builds) |
+| >48 GB VRAM per GPU | Slurm only: `A100-80GB` (80 GB) or `H200` (141 GB), both `--qos=hpgpu` |
 
 On Slurm, prefer plentiful partitions (`RTX3090`, `A5000`, `A6000`, `L40S`,
 `RTX6000ADA`) and use A100/H200 only when the job needs the VRAM or bandwidth.
 
 ## 2. Check availability
 
-- Interactive nodes and b200: `scripts/gpu_avail.sh` (all) or `scripts/gpu_avail.sh g i` (specific).
+- Interactive nodes: `scripts/gpu_avail.sh` (all) or `scripts/gpu_avail.sh g i` (specific).
 - Slurm: `scripts/gpu_avail.sh ai2`, or the `mcp__slurm__*` tools if connected.
 - A GPU is free when memory used is near zero AND utilization is near zero. Never
   assume; always check right before launching.
@@ -52,11 +52,6 @@ otherwise `ssh ai2` and `sbatch`. Key constraints: `--qos=hpgpu` for A100-SXM4
 and H200 partitions, 16 GPU/user on hpgpu, 64 GPU total, 3-day MaxTime
 (checkpoint and resubmit for longer). Template and partition table are in the
 guide. For recurring monitoring/scheduling, use the `/slurm-monitor` skill.
-
-### b200-2
-
-No scheduler; same tmux discipline as interactive nodes. Storage is local
-(`/home/postec_dong`), not the Seoul NFS; copy code and data in first.
 
 ## 4. Data staging (NFS discipline)
 

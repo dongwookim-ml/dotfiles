@@ -1,10 +1,10 @@
 #!/bin/bash
 # GPU availability across the lab resources.
 # Usage: gpu_avail.sh [host ...]
-#   default hosts: a b c d e f g h i b200-2
+#   default hosts: a b c d e f g h i
 #   pass "ai2" to get the Slurm partition free/idle summary instead.
 hosts=("$@")
-[ ${#hosts[@]} -eq 0 ] && hosts=(a b c d e f g h i b200-2)
+[ ${#hosts[@]} -eq 0 ] && hosts=(a b c d e f g h i)
 
 # macOS has no coreutils `timeout`; fall back to gtimeout, then to nothing
 # (ssh's own ConnectTimeout still bounds the connect phase).

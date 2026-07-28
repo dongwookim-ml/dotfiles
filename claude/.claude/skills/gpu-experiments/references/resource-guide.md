@@ -1,6 +1,6 @@
 # GPU Resource Guide
 
-Practical guide to the GPU compute available from this account. It covers three
+Practical guide to the GPU compute available from this account. It covers two
 independent resource pools, how to reach them, what hardware each has, how the
 storage is laid out, and how to run jobs without fighting the network filesystem.
 
@@ -9,20 +9,22 @@ systems, not assumed.
 
 ---
 
-## 1. The three resource pools
+## 1. The two resource pools
 
-You have access to three separate systems. They do **not** share a filesystem or
-a login. Moving data between them means copying it (see Section 7).
+You have access to two separate systems. They do **not** share a filesystem or
+a login. Moving data between them means copying it (see Section 6).
 
 | Pool | Access | Scheduler | GPUs | Shared storage |
 |------|--------|-----------|------|----------------|
 | **Interactive nodes** `a`..`i` | direct `ssh` | none (manual) | 55 GPUs, 2080Ti / 3090 / A5000 / A6000 | NFS `/data_seoul` |
-| **B200 server** `b200-2` | direct `ssh` | none (manual) | 8x B200 (180 GB) | isolated |
 | **Slurm cluster** `ai2` | `ssh` then `sbatch`/`srun` | Slurm 24.11 | ~700 GPUs, 2080Ti to H200 | `/home1`, `/home` |
 
 `seoul` (alias `s`, also reachable as `stail`/`bypass`) is the **jump host and
 NFS server**. It has no GPUs. It exports `/data` to the interactive nodes and is
-the gateway the other pools are reached through.
+the gateway the other pool is reached through.
+
+The B200 servers are no longer available to this account. The largest VRAM now
+reachable is H200 (141 GB) and A100-SXM4-80GB on Slurm.
 
 ---
 
@@ -34,7 +36,8 @@ Slurm panel.
 
 - It listens on **`seoul:50009`** (the process is `gpustat_web ... --port 50009`).
 - It monitors `atlanta beijing canberra dubai edinburgh florence geneva helsinki
-  istanbul` (that is `a`..`i`), both B200 hosts, and `--slurm-host ai2`.
+  istanbul` (that is `a`..`i`) and `--slurm-host ai2`. It may still show stale
+  B200 panels; ignore them.
 
 Reach it from your laptop with an SSH tunnel:
 
@@ -85,7 +88,7 @@ From your laptop the same aliases work through the `bypass` jump host defined in
 Check what is free before claiming GPUs, on the dashboard or from `seoul`:
 
 ```bash
-~/.claude/skills/gpu-experiments/scripts/gpu_avail.sh        # all of a..i + b200-2
+~/.claude/skills/gpu-experiments/scripts/gpu_avail.sh        # all of a..i
 ~/.claude/skills/gpu-experiments/scripts/gpu_avail.sh g i    # specific nodes
 ```
 
@@ -118,33 +121,11 @@ Etiquette on these shared, unscheduled nodes:
   them by default.
 - Use `tmux` or `nohup` so a dropped SSH connection does not kill training.
 - Local disk is small (the root filesystem, for example `atlanta` has ~140 GB
-  free). It is not shared scratch. Keep datasets on NFS or stage them (Section 6).
+  free). It is not shared scratch. Keep datasets on NFS or stage them (Section 5).
 
 ---
 
-## 4. B200 server (`b200-2`)
-
-A single high-end node, external to the campus network.
-
-- Reach it with `ssh b200-2` (`59.150.35.1:30101`, user `postec_dong`).
-- **8x NVIDIA B200, 180 GB HBM3e each.** 72 CPU cores.
-- Driver 580.95, so CUDA up to 13 is supported. B200 is compute capability 10.0,
-  so you need **CUDA 12.8+** and a matching PyTorch build (for example the
-  `cu128` wheels or a recent nightly). Older CUDA will not run on this GPU.
-- Storage is container-local (`/home/postec_dong`, ~1.6 TB). It is **not** on the
-  Seoul NFS. Copy code and data in explicitly (Section 7).
-
-A second B200 host, `b200-1` / `b200-4` (`59.150.33.1:30301`, user `korea_bupj`),
-is the one shown as `b200` on the dashboard. Use `b200-2` unless you have a reason
-to use the other.
-
-Use this node for the largest models and for anything that needs 180 GB per GPU
-or B200-class throughput. It is a scarce, shared resource with no scheduler, so
-check the dashboard and do not leave idle processes holding the GPUs.
-
----
-
-## 5. Slurm cluster (`ai2`)
+## 4. Slurm cluster (`ai2`)
 
 A real batch cluster (Slurm 24.11, OpenHPC). You log in to the scheduler node and
 submit jobs; you do not SSH to compute nodes directly.
@@ -254,12 +235,12 @@ for partitions with a nonzero idle count.
   In a Claude Code session the `mcp__slurm__*` tools submit, list, and cancel
   jobs, tail logs, and report GPU availability, with automatic `--qos=hpgpu`
   injection for partitions that need it.
-- Skills: `/gpu-experiments` plans and launches runs across all three pools;
+- Skills: `/gpu-experiments` plans and launches runs across both pools;
   `/slurm-monitor` watches the cluster and schedules queued experiments.
 
 ---
 
-## 6. NFS and dataset packing (read this before large jobs)
+## 5. NFS and dataset packing (read this before large jobs)
 
 The interactive-node share (`seoul:/data` mounted at `/data_seoul`) is a network
 filesystem. Throughput for one big sequential file is fine, but **metadata
@@ -296,23 +277,20 @@ Rules that keep the GPUs fed:
    compute, but do not point hundreds of workers at raw NFS small files; that is
    the exact pattern this section exists to avoid.
 
-The same logic applies on the Slurm cluster and B200: prefer packed formats,
-stage to node-local scratch, avoid small-file storms on the shared filesystems.
+The same logic applies on the Slurm cluster: prefer packed formats, stage to
+node-local scratch, avoid small-file storms on the shared filesystems.
 
 ---
 
-## 7. Moving data between pools
+## 6. Moving data between pools
 
-The three pools are isolated, so transfers are explicit. Run them from `seoul`,
-which can reach all of them. Compress in flight, and prefer moving one archive
-over many files.
+The two pools are isolated, so transfers are explicit. Run them from `seoul`,
+which can reach both. Compress in flight, and prefer moving one archive over
+many files.
 
 ```bash
 # Seoul NFS  ->  Slurm cluster (big data tier)
 rsync -az --info=progress2 /data/dongwoo/datasets/set.tar ai2:/home/dongwookim/datasets/
-
-# Seoul NFS  ->  B200 node
-rsync -az --info=progress2 /data/dongwoo/proj/ b200-2:/home/postec_dong/proj/
 
 # Pull results back
 rsync -az ai2:/home/dongwookim/runs/exp1/ /data/dongwoo/runs/exp1/
@@ -324,7 +302,7 @@ than rsync walking the tree file by file.
 
 ---
 
-## 8. Quick reference
+## 7. Quick reference
 
 ```
 Dashboard      ssh -N -L 50009:localhost:50009 seoul   ->  http://localhost:50009
@@ -335,9 +313,6 @@ Interactive    ssh a|b|c|d|e|f|g|h|i     (55 GPUs, no scheduler)
   small          b      = 2080 Ti 11 GB
   env            source /data_seoul/dongwoo/conda_init.sh
   storage        /data_seoul/dongwoo   (= /data/dongwoo on seoul, 11 TB free)
-
-B200           ssh b200-2               (8x B200 180 GB, need CUDA 12.8+)
-  storage        /home/postec_dong      (local, ~1.6 TB, not shared)
 
 Slurm          ssh ai2   (or the mcp__slurm__* tools in Claude Code)
   submit         sbatch job.sh   |  srun ... --pty bash

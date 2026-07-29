@@ -99,9 +99,9 @@
     }
   },
   "effortLevel": "xhigh",
+  "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "remoteControlAtStartup": false,
-  "tui": "fullscreen",
   "mcpServers": {
     "slurm": {
       "command": "ssh",

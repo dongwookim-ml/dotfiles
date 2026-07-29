@@ -19,14 +19,17 @@ echo
 "$DOTFILES_DIR/install.sh" --link-only
 
 # A machine is only really in sync if the links resolve, so say so out loud.
+# Only links into this repo: ~/.claude also holds Claude Code's own runtime
+# symlinks, whose breakage is not ours to report.
 echo
 echo "Checking links..."
 broken=0
 while IFS= read -r target; do
+    case "$(readlink "$target")" in "$DOTFILES_DIR"/*) ;; *) continue ;; esac
     [ -e "$target" ] || { echo "  BROKEN: $target -> $(readlink "$target")"; broken=1; }
 done < <(find "$HOME/.zshrc" "$HOME/.vimrc" "$HOME/.tmux.conf" "$HOME/.ssh/config" \
              "$HOME/.claude" -maxdepth 2 -type l 2>/dev/null)
-[ "$broken" -eq 0 ] && echo "  all links resolve"
+[ "$broken" -eq 0 ] && echo "  all links into the repo resolve"
 
 echo
 echo "Now at $(git log --oneline -1)"

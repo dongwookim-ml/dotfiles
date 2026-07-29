@@ -106,14 +106,41 @@ package_entries() {
 # ~/.claude/skills/ is picked up as a second copy of that skill.
 BACKUP_DIR="$HOME/.dotfiles-backup"
 
+# An earlier layout linked whole directories (~/.claude/hooks -> the repo). A
+# target under such a directory resolves to the source file itself, so treating
+# it as a conflict would move the repo's own file away. Replace those directory
+# symlinks with real directories first. Only ones pointing into this repo: on
+# seoul ~/.claude legitimately points at /data, and that must be left alone.
+ensure_real_dirs() {
+    local dir="$1"
+    case "$dir" in "$HOME"|/|.) return 0 ;; esac
+    ensure_real_dirs "$(dirname "$dir")"
+    if [ -L "$dir" ] && [ -d "$dir" ]; then
+        case "$(cd "$dir" && pwd -P)/" in
+            "$DOTFILES_DIR"/*)
+                echo "    unlinking directory $dir (was linked into the repo)"
+                rm "$dir"
+                ;;
+        esac
+    fi
+    [ -d "$dir" ] || mkdir -p "$dir"
+}
+
 link_entry() {
     local src="$DOTFILES_DIR/$1" rel="${1#*/}"
     local target="$HOME/$rel"
+
+    ensure_real_dirs "$(dirname "$target")"
 
     if [ -L "$target" ]; then
         [ "$(readlink "$target")" = "$src" ] && return 0
         rm "$target"
     elif [ -e "$target" ]; then
+        # Never displace something that is really the source file.
+        if [ "$(cd "$(dirname "$target")" && pwd -P)/$(basename "$target")" = "$src" ]; then
+            echo "    skipped $rel (target resolves to the source)" >&2
+            return 0
+        fi
         local dest="$BACKUP_DIR/$rel"
         mkdir -p "$(dirname "$dest")"
         rm -rf "${dest:?}"

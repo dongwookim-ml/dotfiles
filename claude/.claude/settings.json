@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"/Users/dongwookim/.claude/hooks/codex-plan-review.sh\"",
+            "command": "\"$HOME/.claude/hooks/codex-plan-review.sh\"",
             "timeout": 300,
             "statusMessage": "Codex reviewing plan..."
           }

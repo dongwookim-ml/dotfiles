@@ -55,13 +55,13 @@ export PATH="$HOME/bin:$HOME/.local/bin:$PATH"
 # Compares local HEAD against remote tracking ref (no network cost).
 # A background fetch keeps remote refs fresh for the next shell.
 () {
-  local dotdir="$HOME/dotfile"
+  local dotdir="$HOME/dotfiles"
   [[ -d "$dotdir/.git" ]] || return
   local local_head remote_head
   local_head=$(git -C "$dotdir" rev-parse HEAD 2>/dev/null) || return
   remote_head=$(git -C "$dotdir" rev-parse @{u} 2>/dev/null) || return
   if [[ "$local_head" != "$remote_head" ]]; then
-    print -P "%F{yellow}[dotfiles] Your dotfiles are out of date. Run 'cd ~/dotfile && git pull' to update.%f"
+    print -P "%F{yellow}[dotfiles] Your dotfiles are out of date. Run '~/dotfiles/bin/sync' to update.%f"
   fi
   # Fetch in background so remote refs are fresh next time
   git -C "$dotdir" fetch --quiet 2>/dev/null &!

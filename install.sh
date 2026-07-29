@@ -3,6 +3,12 @@ set -e
 
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# --link-only refreshes the symlinks and skips every bootstrap step. bin/sync
+# uses it after a pull; a full run is only needed on a new machine.
+LINK_ONLY=""
+[ "${1:-}" = "--link-only" ] && LINK_ONLY=1
+
+if [ -z "$LINK_ONLY" ]; then
 echo "Installing dotfiles from $DOTFILES_DIR"
 
 # ── Homebrew & core packages ──────────────────────────────────────
@@ -13,7 +19,7 @@ if [[ "$(uname)" == "Darwin" ]]; then
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
     echo "Installing brew packages..."
-    brew install stow tmux fzf
+    brew install tmux fzf
 else
     # Linux: install fzf to ~/.fzf if not available
     if ! command -v fzf &>/dev/null; then
@@ -73,71 +79,75 @@ if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
     git clone https://github.com/tmux-plugins/tpm "$HOME/.tmux/plugins/tpm"
 fi
 
-# ── Stow packages ──────────────────────────────────────────────────
+fi  # end bootstrap (skipped by --link-only)
+
+# ── Link packages ──────────────────────────────────────────────────
 cd "$DOTFILES_DIR"
 
-# Back up existing files that would conflict with stow/symlinks
-handle_stow_conflicts() {
+# One mechanism on every machine. stow is not installable without root on the
+# lab servers, and stow links directories while a fallback links files, which
+# is how the same package ended up laid out three different ways. Everything
+# below is plain `ln -s`, so all machines match.
+#
+# Granularity: one symlink per file, except each skill directory, which is
+# linked whole so new files inside it appear without re-running this script.
+# ~/.claude/skills also holds unrelated skills, so it is never linked itself.
+
+# Print the entries of a package, relative to the package root.
+package_entries() {
     local pkg="$1"
-    local conflicts=()
-
-    while IFS= read -r file; do
-        local rel="${file#"$pkg"/}"
-        local target="$HOME/$rel"
-        # Conflict = real file (not a symlink) already exists at target
-        if [ -e "$target" ] && [ ! -L "$target" ]; then
-            conflicts+=("$target")
-        fi
-    done < <(find "$pkg" -type f)
-
-    if [ ${#conflicts[@]} -eq 0 ]; then
-        return 0
+    if [ -d "$pkg/.claude/skills" ]; then
+        find "$pkg/.claude/skills" -mindepth 1 -maxdepth 1 -type d
     fi
-
-    echo "  Existing files found for $pkg:"
-    for f in "${conflicts[@]}"; do
-        echo "    $f"
-    done
-
-    read -rp "  Overwrite? Backups will be saved as .bak [y/N] " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        for f in "${conflicts[@]}"; do
-            echo "    Backing up $f → ${f}.bak"
-            cp "$f" "${f}.bak"
-            rm "$f"
-        done
-        return 0
-    else
-        echo "  Skipping $pkg"
-        return 1
-    fi
+    find "$pkg" -type f -not -path "$pkg/.claude/skills/*"
 }
 
-# Manual symlink fallback when stow is not available
-stow_manual() {
-    local pkg="$1"
-    while IFS= read -r file; do
-        local rel="${file#"$pkg"/}"
-        local target="$HOME/$rel"
-        local source="$DOTFILES_DIR/$file"
-        mkdir -p "$(dirname "$target")"
-        ln -sf "$source" "$target"
-    done < <(find "$pkg" -type f)
+# Displaced files go here, not next to the original: a .bak left inside
+# ~/.claude/skills/ is picked up as a second copy of that skill.
+BACKUP_DIR="$HOME/.dotfiles-backup"
+
+link_entry() {
+    local src="$DOTFILES_DIR/$1" rel="${1#*/}"
+    local target="$HOME/$rel"
+
+    if [ -L "$target" ]; then
+        [ "$(readlink "$target")" = "$src" ] && return 0
+        rm "$target"
+    elif [ -e "$target" ]; then
+        local dest="$BACKUP_DIR/$rel"
+        mkdir -p "$(dirname "$dest")"
+        rm -rf "${dest:?}"
+        mv "$target" "$dest"
+        echo "    backed up → ${dest/#"$HOME"/\~}"
+    fi
+
+    mkdir -p "$(dirname "$target")"
+    ln -s "$src" "$target"
+    echo "    linked ${target#"$HOME"/}"
 }
 
-echo "Stowing dotfiles..."
+# A bad ssh config is discarded wholesale by ssh, which costs you every
+# connection from that machine. Catch it before it is linked into place.
+check_ssh_config() {
+    command -v ssh >/dev/null || return 0
+    ssh -F "$DOTFILES_DIR/ssh/.ssh/config" -G github.com >/dev/null 2>&1 && return 0
+    echo "ERROR: ssh/.ssh/config is not valid for $(ssh -V 2>&1)" >&2
+    ssh -F "$DOTFILES_DIR/ssh/.ssh/config" -G github.com 2>&1 | head -5 >&2
+    echo "Refusing to link it. Guard newer options with IgnoreUnknown." >&2
+    exit 1
+}
+
+echo "Linking dotfiles..."
+check_ssh_config
 for pkg in zsh vim tmux ssh claude; do
-    if [ -d "$pkg" ]; then
-        echo "  Stowing $pkg..."
-        if handle_stow_conflicts "$pkg"; then
-            if command -v stow &>/dev/null; then
-                stow -t "$HOME" --restow "$pkg"
-            else
-                stow_manual "$pkg"
-            fi
-        fi
-    fi
+    [ -d "$pkg" ] || continue
+    echo "  $pkg"
+    while IFS= read -r entry; do
+        link_entry "$entry"
+    done < <(package_entries "$pkg")
 done
+
+[ -n "$LINK_ONLY" ] && exit 0
 
 # ── Vim plugins ─────────────────────────────────────────────────────
 echo "Installing vim plugins..."

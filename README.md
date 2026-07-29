@@ -1,12 +1,12 @@
 # Dotfiles
 
-Personal development environment managed with [GNU Stow](https://www.gnu.org/software/stow/).
+Personal development environment, symlinked into `$HOME` by `install.sh`.
 
 ## Quick Start
 
 ```bash
-git clone git@github.com:dongwookim-ml/dotfiles.git ~/dotfile
-cd ~/dotfile
+git clone git@github.com:dongwookim-ml/dotfiles.git ~/dotfiles
+cd ~/dotfiles
 ./install.sh
 ```
 
@@ -18,25 +18,40 @@ dotfiles/
 ├── vim/          → ~/.vimrc
 ├── tmux/         → ~/.tmux.conf
 ├── ssh/          → ~/.ssh/config
-├── claude/       → ~/.claude/{settings.json, skills/}
+├── claude/       → ~/.claude/{settings.json, CLAUDE.md, hooks/, skills/}
+├── bin/sync      → Pull + relink on an existing machine
 └── install.sh    → Bootstrap script
 ```
 
-Each top-level directory is a "stow package". Running `stow -t ~ zsh` symlinks
-everything inside `zsh/` into your home directory.
+Each top-level directory mirrors `$HOME`. `install.sh` creates one symlink per
+file, except each directory under `claude/.claude/skills/`, which is linked
+whole so new files inside a skill need no relink. Anything already in the way is
+moved to `~/.dotfiles-backup/` first.
+
+Day to day, after changing something on another machine:
+
+```bash
+~/dotfiles/bin/sync
+```
+
+That pulls, refreshes the links, and reports any that do not resolve. A full
+`./install.sh` run is only needed when setting up a new machine.
 
 ## Machine-Specific Config
 
-Create `~/.zshrc.local` for settings that vary per machine:
+Nothing machine-specific belongs in a tracked file. Each tool has an untracked
+escape hatch:
 
-```bash
-# conda init block
-# export GITHUB_TOKEN="..."
-# export SLACK_WEBHOOK_URL="..."
-# Custom PATH additions
-```
+| Tracked | Machine-local (untracked) |
+|---------|---------------------------|
+| `zsh/.zshrc` | `~/.zshrc.local` (conda init, tokens, PATH, `SLACK_WEBHOOK_URL`) |
+| `ssh/.ssh/config` | `~/.ssh/config.local` |
+| `claude/.claude/settings.json` | `~/.claude/settings.local.json` (`model`, `statusLine`, `mcpServers`, per-machine permissions) |
 
-This file is sourced at the end of `.zshrc` and is not tracked by git.
+`~/.claude/settings.local.json` takes precedence over the tracked settings, and
+Claude Code writes your permission grants into it, so it stays machine-local on
+its own. Keep `enabledPlugins` and `extraKnownMarketplaces` in the tracked file;
+they are not read from the local one.
 
 ## What's Included
 

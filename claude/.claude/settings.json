@@ -60,10 +60,6 @@
       }
     ]
   },
-  "effortLevel": "xhigh",
-  "tui": "fullscreen",
-  "skipDangerousModePermissionPrompt": true,
-  "remoteControlAtStartup": false,
   "enabledPlugins": {
     "github@claude-plugins-official": true,
     "swift-lsp@claude-plugins-official": true,
@@ -96,5 +92,10 @@
         "repo": "JuliusBrussee/caveman"
       }
     }
-  }
+  },
+  "effortLevel": "xhigh",
+  "tui": "fullscreen",
+  "skipDangerousModePermissionPrompt": true,
+  "remoteControlAtStartup": true,
+  "agentPushNotifEnabled": true
 }

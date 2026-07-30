@@ -27,34 +27,26 @@ Homes are NOT shared between machines. Each host needs its own pull.
    - If dirty, show the diff, commit with a descriptive message, `git push origin main`.
    - If the push is rejected, `git pull --rebase origin main` first, then push.
 
-2. Each remote host, in one ssh call per host:
+2. Each remote host:
    ```bash
-   ssh -o BatchMode=yes -o ConnectTimeout=12 <host> '
-     cd ~/dotfiles || exit 0
-     git status --porcelain
-     git pull --ff-only origin main 2>&1 | tail -2
-     grep remoteControlAtStartup claude/.claude/settings.json 2>/dev/null
-   '
+   ssh -o BatchMode=yes -o ConnectTimeout=12 <host> '~/dotfiles/bin/sync'
    ```
-   Replace the final grep with whatever value confirms the change being synced.
+   bin/sync pulls --ff-only, relinks everything (including new skills), and
+   verifies the links. It aborts if the tree is dirty; see Rules.
 
-3. After each successful pull, and once locally, re-link any new skills:
-   `bash ~/dotfiles/claude/.claude/skills/dotfiles-sync/scripts/link-skills.sh`
-   Skill symlinks in ~/.claude/skills are not managed by stow, so a new skill
-   needs this once per machine.
+3. Verify the synced value landed, e.g.
+   `ssh <host> 'grep remoteControlAtStartup ~/.claude/settings.json'`.
 
-4. Report a table: host, pulled or skipped, why.
+4. Report a table: host, synced or skipped, why.
 
 ## Rules
 
 - `--ff-only` always. Never force-push, never `git reset`, never stash or discard
   remote local changes without showing the diff and getting explicit approval.
-- If a host has local uncommitted changes that block the pull, report the diff
-  and skip it. istanbul and stail are known to carry local edits
-  (istanbul: `theme: dark` in settings.json plus .zshrc lines).
+- If a host has local uncommitted changes that block the pull, show the diff.
+  Machine-specific values belong in the untracked counterparts
+  (`~/.zshrc.local`, `~/.ssh/config.local`, `~/.claude/settings.local.json`):
+  migrate them there, stash the tracked edit, then sync.
 - Unreachable host (timeout): report and move on. Do not retry in a loop.
-- After pulling on a host, verify the synced value actually landed by reading
-  the target file through its symlink (`readlink -f ~/.claude/settings.json`),
-  not by trusting the pull output.
 - New files under gitignored paths (e.g. `claude/.claude/hooks/*`) need
   `git add -f` locally before they will sync at all.

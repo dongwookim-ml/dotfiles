@@ -38,7 +38,12 @@ Homes are NOT shared between machines. Each host needs its own pull.
    ```
    Replace the final grep with whatever value confirms the change being synced.
 
-3. Report a table: host, pulled or skipped, why.
+3. After each successful pull, and once locally, re-link any new skills:
+   `bash ~/dotfiles/claude/.claude/skills/dotfiles-sync/scripts/link-skills.sh`
+   Skill symlinks in ~/.claude/skills are not managed by stow, so a new skill
+   needs this once per machine.
+
+4. Report a table: host, pulled or skipped, why.
 
 ## Rules
 

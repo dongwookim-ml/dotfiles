@@ -19,7 +19,7 @@ dotfiles/
 ├── tmux/         → ~/.tmux.conf
 ├── ssh/          → ~/.ssh/config
 ├── claude/       → ~/.claude/{settings.json, CLAUDE.md, hooks/, skills/}
-├── bin/sync      → Pull + relink on an existing machine
+├── bin/sync      → Pull + relink; --all fans out to every host in bin/hosts
 └── install.sh    → Bootstrap script
 ```
 
@@ -33,6 +33,20 @@ Day to day, after changing something on another machine:
 ```bash
 ~/dotfiles/bin/sync
 ```
+
+After committing something on the laptop, push it to every machine at once:
+
+```bash
+~/dotfiles/bin/sync --all
+```
+
+That pushes, syncs the laptop, then runs `bin/sync` on each host listed in
+`bin/hosts`. Add a machine by adding its ssh alias to that file, once it has a
+clone and has had `./install.sh` run.
+
+Syncing is deliberately manual. A bad line in `.ssh/config` or `.zshrc` can cost
+you every connection from a machine, and that should land while you are watching,
+not from a timer.
 
 That pulls, refreshes the links, and reports any that do not resolve. A full
 `./install.sh` run is only needed when setting up a new machine.

@@ -1,9 +1,58 @@
 #!/bin/bash
 # Pull the dotfiles and refresh the symlinks. Safe to run on any machine.
+#
+#   bin/sync         sync this machine
+#   bin/sync --all   push, sync this machine, then sync every host in bin/hosts
+#
+# --all is meant to be run from the laptop, where the edits are authored.
 set -e
 
 DOTFILES_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$DOTFILES_DIR"
+
+# ── Fan out to the other machines ──────────────────────────────────
+if [ "${1:-}" = "--all" ]; then
+    # A fan-out is pointless if what you changed is not published yet, and
+    # committing for you would guess at the message, so stop and say so.
+    if [ -n "$(git status --porcelain)" ]; then
+        echo "Uncommitted changes here; commit them first (or move machine-specific" >&2
+        echo "values to ~/.zshrc.local, ~/.ssh/config.local, ~/.claude/settings.local.json):" >&2
+        git status --short >&2
+        exit 1
+    fi
+    git fetch -q
+    ahead="$(git rev-list --count '@{u}..HEAD')"
+    if [ "$ahead" -gt 0 ]; then
+        echo "Pushing $ahead local commit(s)..."
+        git push
+        echo
+    fi
+
+    echo "########## $(hostname -s) (local) ##########"
+    "$0"
+
+    failed=()
+    while IFS= read -r host; do
+        case "$host" in ''|\#*) continue ;; esac
+        echo
+        echo "########## $host ##########"
+        if out="$(ssh -o BatchMode=yes -o ConnectTimeout=12 "$host" '~/dotfiles/bin/sync' 2>&1)"; then
+            printf '%s\n' "$out" | tail -6
+        else
+            printf '%s\n' "$out" | tail -6
+            failed+=("$host")
+        fi
+    done < "$DOTFILES_DIR/bin/hosts"
+
+    echo
+    if [ ${#failed[@]} -eq 0 ]; then
+        echo "All hosts synced to $(git rev-parse --short HEAD)."
+    else
+        echo "FAILED: ${failed[*]} (others synced to $(git rev-parse --short HEAD))" >&2
+        exit 1
+    fi
+    exit 0
+fi
 
 dirty="$(git status --porcelain)"
 if [ -n "$dirty" ]; then

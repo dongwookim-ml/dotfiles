@@ -10,32 +10,35 @@ GitHub is the hub; servers never sync peer-to-peer.
 
 ## Hosts
 
-| Host | User | Has dotfiles | Runs Claude Code | Notes |
-|------|------|--------------|------------------|-------|
-| ai2 (gsai-login-2) | dongwookim | yes | yes | Slurm login node. The sync target that matters most. |
-| stail / bypass (seoul) | dongwoo | yes | no | Jump host for a-i and ai2. |
-| i (istanbul) | dongwoo | yes | no | Lab GPU node. |
-| a-h | dongwoo | no | no | No clone; skip unless the user asks to bootstrap one. |
-| s, ai, ai3, mllab | - | unknown | unknown | Often unreachable without VPN; report timeout, don't retry. |
+The list lives in `bin/hosts`, one ssh alias per line. It is the single source
+of truth; do not hard-code hosts here or in a command.
+
+| Host | User | Runs Claude Code | Notes |
+|------|------|------------------|-------|
+| ai2 (gsai-login-2) | dongwookim | yes | Slurm login node. The sync target that matters most. |
+| stail / bypass (seoul) | dongwoo | no | Jump host for a-i and ai2. |
+| i (istanbul) | dongwoo | no | Lab GPU node. |
+| a-h | dongwoo | no | No clone; skip unless the user asks to bootstrap one. |
+| s, ai, ai3, mllab | - | unknown | Often unreachable without VPN; report timeout, don't retry. |
 
 Homes are NOT shared between machines. Each host needs its own pull.
 
 ## Procedure
 
-1. Local: commit and push.
-   - `cd ~/dotfiles && git status --short`
-   - If dirty, show the diff, commit with a descriptive message, `git push origin main`.
-   - If the push is rejected, `git pull --rebase origin main` first, then push.
+1. Commit locally. `cd ~/dotfiles && git status --short`; if dirty, show the
+   diff and commit with a descriptive message. Do not push by hand, step 2 does it.
 
-2. Each remote host:
+2. Run the fan-out from the laptop:
    ```bash
-   ssh -o BatchMode=yes -o ConnectTimeout=12 <host> '~/dotfiles/bin/sync'
+   ~/dotfiles/bin/sync --all
    ```
-   bin/sync pulls --ff-only, relinks everything (including new skills), and
-   verifies the links. It aborts if the tree is dirty; see Rules.
+   It pushes any unpushed commits, syncs this machine, then runs `bin/sync` on
+   every host in `bin/hosts`. Each host pulls `--ff-only`, relinks everything
+   including new skills, and verifies its links. It refuses to start if the
+   local tree is dirty, and exits non-zero naming any host that failed.
 
-3. Verify the synced value landed, e.g.
-   `ssh <host> 'grep remoteControlAtStartup ~/.claude/settings.json'`.
+3. Verify the change actually landed on the host that matters, e.g.
+   `ssh ai2 'grep remoteControlAtStartup ~/.claude/settings.json'`.
 
 4. Report a table: host, synced or skipped, why.
 

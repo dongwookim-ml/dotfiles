@@ -1,0 +1,6 @@
+# Hosts with their own ~/dotfiles clone, synced by `bin/sync --all`.
+# One ssh alias per line. Homes are not shared, so each needs its own pull.
+# A host without a clone does not belong here; clone and run install.sh first.
+ai2
+stail
+i

@@ -15,6 +15,9 @@ Personal dotfiles. Each top-level directory mirrors `$HOME`, and `install.sh` sy
 # Pull and relink on an existing machine (the everyday command)
 bin/sync
 
+# Push, then sync every host in bin/hosts (run from the laptop)
+bin/sync --all
+
 # Relink only, no pull, no bootstrap
 ./install.sh --link-only
 

@@ -36,7 +36,9 @@ if [ "${1:-}" = "--all" ]; then
         case "$host" in ''|\#*) continue ;; esac
         echo
         echo "########## $host ##########"
-        if out="$(ssh -o BatchMode=yes -o ConnectTimeout=12 "$host" '~/dotfiles/bin/sync' 2>&1)"; then
+        # -n matters: without it ssh reads the host list off this loop's stdin
+        # and every host after the first is silently skipped.
+        if out="$(ssh -n -o BatchMode=yes -o ConnectTimeout=12 "$host" '~/dotfiles/bin/sync' 2>&1)"; then
             printf '%s\n' "$out" | tail -6
         else
             printf '%s\n' "$out" | tail -6

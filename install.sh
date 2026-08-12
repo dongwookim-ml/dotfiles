@@ -166,7 +166,7 @@ check_ssh_config() {
 
 echo "Linking dotfiles..."
 check_ssh_config
-for pkg in zsh vim tmux ssh claude; do
+for pkg in zsh vim tmux ssh claude codex; do
     [ -d "$pkg" ] || continue
     echo "  $pkg"
     while IFS= read -r entry; do

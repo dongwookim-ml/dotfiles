@@ -1,0 +1,18 @@
+{
+  "description": "Personal Codex lifecycle hooks.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "^(Bash|mcp__slurm__(submit_job|run_command))$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -B \"$HOME/.codex/hooks/open-ai2-slurm-panel.py\"",
+            "timeout": 3,
+            "statusMessage": "Opening ai2 Slurm monitor"
+          }
+        ]
+      }
+    ]
+  }
+}

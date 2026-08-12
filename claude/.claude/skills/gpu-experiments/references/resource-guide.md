@@ -23,9 +23,6 @@ a login. Moving data between them means copying it (see Section 6).
 NFS server**. It has no GPUs. It exports `/data` to the interactive nodes and is
 the gateway the other pool is reached through.
 
-The B200 servers are no longer available to this account. The largest VRAM now
-reachable is H200 (141 GB) and A100-SXM4-80GB on Slurm.
-
 ---
 
 ## 2. Live utilization dashboard
@@ -36,8 +33,7 @@ Slurm panel.
 
 - It listens on **`seoul:50009`** (the process is `gpustat_web ... --port 50009`).
 - It monitors `atlanta beijing canberra dubai edinburgh florence geneva helsinki
-  istanbul` (that is `a`..`i`) and `--slurm-host ai2`. It may still show stale
-  B200 panels; ignore them.
+  istanbul` (that is `a`..`i`) and `--slurm-host ai2`.
 
 Reach it from your laptop with an SSH tunnel:
 

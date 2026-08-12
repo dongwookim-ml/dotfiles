@@ -19,6 +19,7 @@ dotfiles/
 ├── tmux/         → ~/.tmux.conf
 ├── ssh/          → ~/.ssh/config
 ├── claude/       → ~/.claude/{settings.json, CLAUDE.md, hooks/, skills/}
+├── codex/        → ~/.codex/{hooks.json, hooks/}
 ├── bin/sync      → Pull + relink; --all fans out to every host in bin/hosts
 └── install.sh    → Bootstrap script
 ```
@@ -87,6 +88,9 @@ they are not read from the local one.
 ### Claude Code
 - Settings, enabled plugins, status line config
 - Slack notification skill
+
+### Codex
+- Opens the ai2 Slurm monitoring page in the built-in browser after job submission
 
 ### SSH
 - Host config only (no private keys)
